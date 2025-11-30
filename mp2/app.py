@@ -4,6 +4,7 @@ import pandas as pd
 import os
 from datetime import datetime
 import base64
+import pathlib
 
 # ---------- Basic Page Config ----------
 st.set_page_config(
@@ -15,14 +16,21 @@ st.set_page_config(
 DATA_FILE = "feedback_data.csv"
 
 # ---------- Convert Image to Base64 ----------
-def get_base64_of_image(image_path):
+def get_base64_of_image(image_name: str) -> str:
+    image_path = BASE_DIR / image_name  # always next to app.py
+    if not image_path.exists():
+        # Avoid crashing the app if file is missing on server
+        st.warning(f"Background image not found: {image_path}")
+        return ""
     with open(image_path, "rb") as file:
         data = file.read()
     return base64.b64encode(data).decode()
 
 # ---------- Set Global Background Image ----------
-def set_background(image_file):
+def set_background(image_file: str):
     encoded_image = get_base64_of_image(image_file)
+    if not encoded_image:
+        return  # don't apply CSS if image missing
     st.markdown(
         f"""
         <style>
@@ -307,3 +315,4 @@ def main():
 # ---------- Run App ----------
 if __name__ == "__main__":
     main()
+
